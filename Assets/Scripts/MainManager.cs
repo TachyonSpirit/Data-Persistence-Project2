@@ -12,6 +12,7 @@ public class MainManager : MonoBehaviour
 
     public Text ScoreText;
     public GameObject GameOverText;
+    public Text BestScoreText;
     
     private bool m_Started = false;
     private int m_Points;
@@ -22,6 +23,9 @@ public class MainManager : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
+        //UpdateBestScoreText();
+        ScoreText.text = "Score " + "(" + PersistencyManager.Instance.userName + ")" + " : 0";
+
         const float step = 0.6f;
         int perLine = Mathf.FloorToInt(4.0f / step);
         
@@ -65,7 +69,12 @@ public class MainManager : MonoBehaviour
     void AddPoint(int point)
     {
         m_Points += point;
-        ScoreText.text = $"Score : {m_Points}";
+        ScoreText.text = "Score " + "(" + PersistencyManager.Instance.userName + ") : " + m_Points;
+    }
+
+    private void UpdateBestScoreText()
+    {
+        //BestScoreText.text = "Best Score : " + PersistencyManager.Instance.userName;
     }
 
     public void GameOver()
