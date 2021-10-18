@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
+using System.IO;
 
 public class MainManager : MonoBehaviour
 {
@@ -19,11 +20,25 @@ public class MainManager : MonoBehaviour
     
     private bool m_GameOver = false;
 
-    
+    public string hsUsername;
+    public int hsScore;
+
     // Start is called before the first frame update
     void Start()
     {
-        //UpdateBestScoreText();
+        // Get the current highscore username and current highscore score
+        LoadHighScore();
+        Debug.Log("hsUsername is  : " + hsUsername);
+        Debug.Log("hsScore is     : " + hsScore);
+        
+        if (PersistencyManager.Instance.userName == "RESET")
+        {
+            SaveHighScore("Dummy",0);
+        }
+
+        // Display the current highscore username and current highscore score on the screen
+        BestScoreText.text = "Highscore : " + hsUsername + " : " + hsScore;
+
         ScoreText.text = "Score " + "(" + PersistencyManager.Instance.userName + ")" + " : 0";
 
         const float step = 0.6f;
@@ -81,5 +96,43 @@ public class MainManager : MonoBehaviour
     {
         m_GameOver = true;
         GameOverText.SetActive(true);
+
+        // Check if the user's score is great than the highscore
+        if (m_Points > hsScore)
+        {
+            // Save the new data to disk!
+            SaveHighScore(PersistencyManager.Instance.userName,m_Points);
+        }
+    }
+
+    [System.Serializable]
+    public class SaveData
+    {
+        public string highScore_User;
+        public int highScore_Score;
+    }
+    public void SaveHighScore(string my_user, int my_score)
+    {
+        SaveData data = new SaveData();
+        data.highScore_User = my_user;
+        data.highScore_Score = my_score;
+
+        string json = JsonUtility.ToJson(data);
+
+        File.WriteAllText(Application.persistentDataPath + "/savefile.json", json);
+    }
+    public void LoadHighScore()
+    {
+        Debug.Log("Started LoadHighScore");
+        string path = Application.persistentDataPath + "/savefile.json";
+        if (File.Exists(path))
+        {
+            string json = File.ReadAllText(path);
+            SaveData data = JsonUtility.FromJson<SaveData>(json);
+
+            hsUsername = data.highScore_User;
+            hsScore = data.highScore_Score;
+        }
+        Debug.Log("Finished LoadHighScore");
     }
 }
